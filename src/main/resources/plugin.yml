@@ -1,0 +1,12 @@
+name: Vinyls
+version: '${version}'
+main: dev.furq.vinyls.Vinyls
+api-version: '1.16'
+authors: [Furq]
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0
+commands:
+  vinyls:
+    permission: vinyls.admin
+    description: "Vinyls Admin Commands"
+    tabCompleter: dev.furq.vinyls.tabcompleter.TabCompleter

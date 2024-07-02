@@ -41,17 +41,12 @@ class Vinyls : JavaPlugin() {
         if (config.getBoolean("update-checker")) updateChecker()
     }
 
-    override fun onDisable() {
-        // Plugin shutdown logic
-    }
-
     private fun updateChecker() {
         UpdateChecker(this, UpdateCheckSource.SPIGOT, "117674")
             .setDownloadLink("https://modrinth.com/plugin/vinyls")
             .setDonationLink("buymeacoffee.com/furq")
             .setNotifyOpsOnJoin(true)
             .setUserAgent(UserAgentBuilder().addPluginNameAndVersion())
-            .checkEveryXHours(0.5)
             .checkNow()
     }
 }

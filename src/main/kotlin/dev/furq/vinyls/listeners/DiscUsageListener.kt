@@ -14,7 +14,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockBurnEvent
-import org.bukkit.event.block.BlockExplodeEvent
+import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -30,7 +30,6 @@ class DiscUsageListener(private val plugin: Vinyls) : Listener {
         val player = event.player
         val block = event.clickedBlock
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
-        if (player.gameMode == GameMode.CREATIVE) return
         if (block?.type != Material.JUKEBOX) return
         if (event.hand != EquipmentSlot.HAND) return
 
@@ -53,12 +52,12 @@ class DiscUsageListener(private val plugin: Vinyls) : Listener {
     }
 
     @EventHandler
-    fun handleBlockExplode(event: BlockExplodeEvent) {
+    fun handleBlockExplode(event: EntityExplodeEvent) {
         event.blockList().forEach { block ->
             if (block.type == Material.JUKEBOX) {
-                val pdc: PersistentDataContainer = CustomBlockData(event.block, plugin)
+                val pdc: PersistentDataContainer = CustomBlockData(block, plugin)
                 if (pdc.has(discKey, DataType.ITEM_STACK)) {
-                    stopCustomDisc(event.block)
+                    stopCustomDisc(block)
                 }
             }
         }

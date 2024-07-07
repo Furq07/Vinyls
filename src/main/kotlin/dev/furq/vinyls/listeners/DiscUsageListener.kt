@@ -3,7 +3,6 @@ package dev.furq.vinyls.listeners
 import com.jeff_media.customblockdata.CustomBlockData
 import com.jeff_media.morepersistentdatatypes.DataType
 import dev.furq.vinyls.Vinyls
-import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.SoundCategory

@@ -5,7 +5,7 @@ import dev.furq.vinyls.commands.VinylsCommand
 import dev.furq.vinyls.listeners.DiscUsageListener
 import dev.furq.vinyls.tabcompleter.TabCompleter
 import dev.furq.vinyls.utils.ResourcePackGenerator
-import com.jeff_media.updatechecker.UpdateCheckSource;
+import com.jeff_media.updatechecker.UpdateCheckSource
 import com.jeff_media.updatechecker.UpdateChecker
 import com.jeff_media.updatechecker.UserAgentBuilder
 import org.bukkit.configuration.file.YamlConfiguration

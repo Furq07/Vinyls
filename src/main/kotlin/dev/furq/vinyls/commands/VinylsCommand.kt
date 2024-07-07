@@ -14,7 +14,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import java.io.File
-import java.util.*
+import java.util.UUID
 
 class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
 

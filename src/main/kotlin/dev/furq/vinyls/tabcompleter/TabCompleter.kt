@@ -16,10 +16,10 @@ class TabCompleter(private val plugin: Vinyls) : TabCompleter {
     ): List<String>? {
         if (command.name.equals("vinyls", ignoreCase = true)) {
             if (args.size == 1) {
-                return listOf("reload", "givedisc")
+                return listOf("reload", "give")
             } else if (args.size == 2) {
                 when (args[0].lowercase()) {
-                    "givedisc" -> {
+                    "give" -> {
                         val discsConfigFile = File(plugin.dataFolder, "discs.yml")
                         if (!discsConfigFile.exists()) plugin.saveResource("discs.yml", false)
                         val discsConfig = YamlConfiguration.loadConfiguration(discsConfigFile)

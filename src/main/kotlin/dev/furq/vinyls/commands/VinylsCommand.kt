@@ -20,13 +20,14 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
 
     private val discsConfigFile = File(plugin.dataFolder, "discs.yml")
     private var discsConfig = YamlConfiguration.loadConfiguration(discsConfigFile)
+    private val prefix = plugin.getMessage("prefix")
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (command.label.equals("vinyls", ignoreCase = true) && args.isNotEmpty()) {
             when (args[0].lowercase()) {
                 "reload" -> handleReload(sender)
-                "givedisc" -> handleGiveDisc(sender, args)
-                else -> sender.sendMessage("§cUnknown subcommand.")
+                "give" -> handleGiveDisc(sender, args)
+                else -> sender.sendMessage( "$prefix ${plugin.getMessage("command-unknown")}")
             }
         }
         return true
@@ -40,26 +41,26 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
         if (!sourceFolder.exists()) sourceFolder.mkdirs()
         if (!targetFolder.exists()) targetFolder.mkdirs()
         ResourcePackGenerator(plugin).generateResourcePack(discsConfig, sourceFolder, targetFolder)
-        sender.sendMessage("§aReloaded Vinyls successfully!")
+        sender.sendMessage("$prefix §7Reloaded Vinyls successfully!")
     }
 
     private fun handleGiveDisc(sender: CommandSender, args: Array<out String>) {
         if (args.size < 2) {
-            sender.sendMessage("§cUsage: /vinyls givedisc <discName> [player]")
+            sender.sendMessage("$prefix §7Usage: /vinyls give <discName> [player]")
             return
         }
         val discName = args[1]
         val discs = discsConfig.getConfigurationSection("discs")?.getKeys(false) ?: return sender.sendMessage("§cNo discs found in config.")
 
         if (discName !in discs) {
-            sender.sendMessage("§cThis item does not exist.")
+            sender.sendMessage("$prefix ${plugin.getMessage("discs-not-found")}")
             return
         }
 
         val discConfig = discsConfig.getConfigurationSection("discs.$discName")!!
         val material = discConfig.getString("material")?.let { Material.valueOf(it) }
         if (material == null) {
-            sender.sendMessage("§cInvalid material for disc.")
+            sender.sendMessage("$prefix ${plugin.getMessage("material-invalid")}")
             return
         }
 
@@ -86,10 +87,10 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
 
         if (targetPlayer != null) {
             targetPlayer.inventory.addItem(discItem)
-            sender.sendMessage("§aGave ${targetPlayer.name} the disc $discName.")
-            targetPlayer.sendMessage("§aYou have received the disc $discName.")
+            sender.sendMessage("$prefix ${plugin.getMessage("disc-given").replace("{player}", targetPlayer.name).replace("{discName}", discName)}")
+            targetPlayer.sendMessage("$prefix ${plugin.getMessage("disc-received").replace("{discName}", discName)}")
         } else {
-            sender.sendMessage("§cPlayer not found or not specified.")
+            sender.sendMessage("$prefix ${plugin.getMessage("player-not-found")}")
         }
     }
 }

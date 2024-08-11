@@ -14,6 +14,7 @@ import java.io.File
 
 class Vinyls : JavaPlugin() {
     private lateinit var discUsageListener: DiscUsageListener
+    private lateinit var messagesConfig: YamlConfiguration
 
     override fun onEnable() {
         discUsageListener = DiscUsageListener(this)
@@ -23,14 +24,19 @@ class Vinyls : JavaPlugin() {
         saveDefaultConfig()
         reloadConfig()
 
-        val config = this.config
+        val messagesConfigFile = File(dataFolder, "messages.yml")
+        if (!messagesConfigFile.exists()) saveResource("messages.yml", false)
+        messagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
+
         val discsConfigFile = File(dataFolder, "discs.yml")
         if (!discsConfigFile.exists()) saveResource("discs.yml", false)
         val discsConfig = YamlConfiguration.loadConfiguration(discsConfigFile)
+
         val sourceFolder = File(dataFolder, "source_files")
-        val targetFolder = File(dataFolder, "resource_pack")
         if (!sourceFolder.exists()) sourceFolder.mkdirs()
+        val targetFolder = File(dataFolder, "resource_pack")
         if (!targetFolder.exists()) targetFolder.mkdirs()
+
         ResourcePackGenerator(this).generateResourcePack(discsConfig, sourceFolder, targetFolder)
 
         getCommand("vinyls")?.setExecutor(VinylsCommand(this))
@@ -38,15 +44,19 @@ class Vinyls : JavaPlugin() {
 
         logger.info("Thank you for using my plugin - Furq")
 
+        val config = this.config
         if (config.getBoolean("update-checker")) updateChecker()
     }
 
     private fun updateChecker() {
         UpdateChecker(this, UpdateCheckSource.SPIGOT, "117674")
             .setDownloadLink("https://modrinth.com/plugin/vinyls")
-            .setDonationLink("buymeacoffee.com/furq")
             .setNotifyOpsOnJoin(true)
             .setUserAgent(UserAgentBuilder().addPluginNameAndVersion())
             .checkNow()
+    }
+
+    fun getMessage(key: String): String {
+        return messagesConfig.getString(key, "Message not found")!!
     }
 }

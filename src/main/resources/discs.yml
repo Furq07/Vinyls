@@ -2,9 +2,9 @@
 # Each disc will have its own entry under the "discs" node.
 discs:
   # This is the identifier for the disc. You can name it whatever you like.
+  # YOU MUST ADD A OGG AND A PNG FILE WITH THE SAME NAME IN `source_files` FOLDER.
   disc_name:
     # The display name of the disc. This is what will appear in the game when the disc is seen in an inventory or hotbar.
-    # YOU MUST ADD A OGG AND PNG FILE WITH THE SAME IN `source_files` FOLDER.
     display_name: "&6Disc Name"
     # The material that represents the disc in the game. "PAPER" is used here, but you can use any material.
     material: "PAPER"

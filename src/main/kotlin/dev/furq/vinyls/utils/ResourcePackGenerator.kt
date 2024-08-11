@@ -42,24 +42,35 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
                 "sounds" to listOf(mapOf("name" to "records/$discName", "stream" to true))
             )
 
-            copyFile(File(sourceFolder, "$discName.png"), File(texturesItemDir, "$discName.png"))
+            val textureFile = File(sourceFolder, "$discName.png")
+            val textureExists = textureFile.exists()
+
+            if (textureExists) {
+                copyFile(textureFile, File(texturesItemDir, "$discName.png"))
+            } else {
+                plugin.logger.info("vinyls/source_files/$discName.png does not exist.")
+            }
+
+            val texturePath = if (textureExists) "$discName" else "minecraft:item/music_disc_cat"
 
             val itemModelData = itemModelDataMap.getOrPut(material) { mutableMapOf() }
-            itemModelData["parent"] = "item/generated"
-            itemModelData["textures"] = mapOf("layer0" to "item/${material}")
+            itemModelData["parent"] = "minecraft:item/generated"
+            itemModelData["textures"] = mapOf("layer0" to "item/$material")
             itemModelData["overrides"] =
                 (itemModelData["overrides"] as? MutableList<Map<String, Any>> ?: mutableListOf()).apply {
                     add(
                         mapOf(
                             "predicate" to mapOf("custom_model_data" to customModelData),
-                            "model" to "$discName"
+                            "model" to texturePath
                         )
                     )
                 }
 
-            val discModelPath = File(modelsDir, "$discName.json")
-            val discModelData = mapOf("parent" to "item/generated", "textures" to mapOf("layer0" to "item/$discName"))
-            discModelPath.writeText(discModelData.toJson())
+            if (textureExists) {
+                val discModelPath = File(modelsDir, "$discName.json")
+                val discModelData = mapOf("parent" to "item/generated", "textures" to mapOf("layer0" to "item/$discName"))
+                discModelPath.writeText(discModelData.toJson())
+            }
         }
 
         soundsDir.listFiles()?.forEach { oggFile ->
@@ -88,6 +99,13 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
             }
         }
 
+        modelsDir.listFiles()?.forEach { modelFile ->
+            val discName = modelFile.nameWithoutExtension
+            if (discName !in existingDiscNames) {
+                modelFile.delete()
+            }
+        }
+
         soundsJsonFile.writeText(soundsData.toJson())
         File(
             targetFolder,
@@ -100,7 +118,7 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
         if (source.exists()) {
             source.copyTo(destination, overwrite = true)
         } else {
-            plugin.logger.info("\u00A74WARNING\u00A7a: ${source.absolutePath} does not exist.")
+            plugin.logger.info("${source.absolutePath} does not exist.")
         }
     }
 
@@ -109,7 +127,7 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
         ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile))).use { zipOut ->
             targetFolder.walkTopDown().forEach { file ->
                 if (file.isFile) {
-                    val entryName = targetFolder.toPath().relativize(file.toPath()).toString()
+                    val entryName = targetFolder.toPath().relativize(file.toPath()).toString().replace("\\", "/")
                     zipOut.putNextEntry(ZipEntry(entryName))
                     file.inputStream().use { it.copyTo(zipOut) }
                     zipOut.closeEntry()

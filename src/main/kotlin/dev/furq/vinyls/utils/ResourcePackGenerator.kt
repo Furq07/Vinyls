@@ -3,7 +3,9 @@ package dev.furq.vinyls.utils
 import dev.furq.vinyls.Vinyls
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
-import java.io.*
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -45,11 +47,7 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
             val textureFile = File(sourceFolder, "$discName.png")
             val textureExists = textureFile.exists()
 
-            if (textureExists) {
-                copyFile(textureFile, File(texturesItemDir, "$discName.png"))
-            } else {
-                plugin.logger.info("vinyls/source_files/$discName.png does not exist.")
-            }
+            copyFile(textureFile, File(texturesItemDir, "$discName.png"))
 
             val texturePath = if (textureExists) "$discName" else "minecraft:item/music_disc_cat"
 
@@ -68,7 +66,8 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
 
             if (textureExists) {
                 val discModelPath = File(modelsDir, "$discName.json")
-                val discModelData = mapOf("parent" to "item/generated", "textures" to mapOf("layer0" to "item/$discName"))
+                val discModelData =
+                    mapOf("parent" to "item/generated", "textures" to mapOf("layer0" to "item/$discName"))
                 discModelPath.writeText(discModelData.toJson())
             }
         }
@@ -118,7 +117,7 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
         if (source.exists()) {
             source.copyTo(destination, overwrite = true)
         } else {
-            plugin.logger.info("${source.absolutePath} does not exist.")
+            plugin.logger.warning("${source.absolutePath} does not exist.")
         }
     }
 

@@ -1,4 +1,4 @@
-package dev.furq.vinyls.tabcompleter
+package dev.furq.vinyls.utils
 
 import dev.furq.vinyls.Vinyls
 import org.bukkit.command.Command
@@ -12,7 +12,7 @@ class TabCompleter(private val plugin: Vinyls) : TabCompleter {
         sender: CommandSender,
         command: Command,
         alias: String,
-        args: Array<String>
+        args: Array<String>,
     ): List<String>? {
         if (command.name.equals("vinyls", ignoreCase = true)) {
             if (args.size == 1) {
@@ -26,6 +26,7 @@ class TabCompleter(private val plugin: Vinyls) : TabCompleter {
                         val discs = discsConfig.getConfigurationSection("discs")?.getKeys(false)!!
                         return discs.toList()
                     }
+
                     else -> return null
                 }
             }

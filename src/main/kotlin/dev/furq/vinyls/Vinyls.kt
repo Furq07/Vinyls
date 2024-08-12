@@ -1,24 +1,28 @@
 package dev.furq.vinyls
 
 import com.jeff_media.customblockdata.CustomBlockData
-import dev.furq.vinyls.commands.VinylsCommand
-import dev.furq.vinyls.listeners.DiscUsageListener
-import dev.furq.vinyls.tabcompleter.TabCompleter
-import dev.furq.vinyls.utils.ResourcePackGenerator
 import com.jeff_media.updatechecker.UpdateCheckSource
 import com.jeff_media.updatechecker.UpdateChecker
 import com.jeff_media.updatechecker.UserAgentBuilder
+import dev.furq.vinyls.commands.VinylsCommand
+import dev.furq.vinyls.listeners.DiscUsageListener
+import dev.furq.vinyls.listeners.InventoryUpdateListener
+import dev.furq.vinyls.utils.ResourcePackGenerator
+import dev.furq.vinyls.utils.TabCompleter
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 class Vinyls : JavaPlugin() {
     private lateinit var discUsageListener: DiscUsageListener
+    private lateinit var inventoryUpdateListener: InventoryUpdateListener
     private lateinit var messagesConfig: YamlConfiguration
 
     override fun onEnable() {
         discUsageListener = DiscUsageListener(this)
+        inventoryUpdateListener = InventoryUpdateListener(this)
         server.pluginManager.registerEvents(discUsageListener, this)
+        server.pluginManager.registerEvents(inventoryUpdateListener, this)
         CustomBlockData.registerListener(this)
 
         saveDefaultConfig()

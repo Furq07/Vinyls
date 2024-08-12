@@ -27,7 +27,7 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
             when (args[0].lowercase()) {
                 "reload" -> handleReload(sender)
                 "give" -> handleGiveDisc(sender, args)
-                else -> sender.sendMessage( "$prefix ${plugin.getMessage("command-unknown")}")
+                else -> sender.sendMessage("$prefix ${plugin.getMessage("command-unknown")}")
             }
         }
         return true
@@ -50,7 +50,8 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
             return
         }
         val discName = args[1]
-        val discs = discsConfig.getConfigurationSection("discs")?.getKeys(false) ?: return sender.sendMessage("§cNo discs found in config.")
+        val discs = discsConfig.getConfigurationSection("discs")?.getKeys(false)
+            ?: return sender.sendMessage("§cNo discs found in config.")
 
         if (discName !in discs) {
             sender.sendMessage("$prefix ${plugin.getMessage("discs-not-found")}")
@@ -58,24 +59,23 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
         }
 
         val discConfig = discsConfig.getConfigurationSection("discs.$discName")!!
-        val material = discConfig.getString("material")?.let { Material.valueOf(it) }
-        if (material == null) {
-            sender.sendMessage("$prefix ${plugin.getMessage("material-invalid")}")
-            return
-        }
 
+        val material = discConfig.getString("material")?.let { Material.valueOf(it) }
+            ?: return sender.sendMessage("$prefix ${plugin.getMessage("material-invalid")}")
         val customModelData = discConfig.getInt("custom_model_data")
         val displayName = discConfig.getString("display_name")
-        val lore = discConfig.getStringList("lore")
-
+        val lore = discConfig.getStringList("lore").map { ChatColor.translateAlternateColorCodes('&', it) }
         val discItem = ItemStack(material, 1).apply {
             itemMeta = itemMeta?.apply {
                 setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName!!))
                 setCustomModelData(customModelData)
-                val colorLore = lore.map { ChatColor.translateAlternateColorCodes('&', it) }
-                this.lore = colorLore
+                setLore(lore)
                 persistentDataContainer.set(NamespacedKey(plugin, "music_disc"), PersistentDataType.STRING, discName)
-                persistentDataContainer.set(NamespacedKey(plugin, "unique_id"), PersistentDataType.STRING, UUID.randomUUID().toString())
+                persistentDataContainer.set(
+                    NamespacedKey(plugin, "unique_id"),
+                    PersistentDataType.STRING,
+                    UUID.randomUUID().toString()
+                )
             }
         }
 
@@ -87,7 +87,12 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
 
         if (targetPlayer != null) {
             targetPlayer.inventory.addItem(discItem)
-            sender.sendMessage("$prefix ${plugin.getMessage("disc-given").replace("{player}", targetPlayer.name).replace("{discName}", discName)}")
+            sender.sendMessage(
+                "$prefix ${
+                    plugin.getMessage("disc-given").replace("{player}", targetPlayer.name)
+                        .replace("{discName}", discName)
+                }"
+            )
             targetPlayer.sendMessage("$prefix ${plugin.getMessage("disc-received").replace("{discName}", discName)}")
         } else {
             sender.sendMessage("$prefix ${plugin.getMessage("player-not-found")}")

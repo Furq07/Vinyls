@@ -9,4 +9,4 @@ commands:
   vinyls:
     permission: vinyls.admin
     description: "Vinyls Admin Commands"
-    tabCompleter: dev.furq.vinyls.tabcompleter.TabCompleter
+    tabCompleter: dev.furq.vinyls.utils.TabCompleter

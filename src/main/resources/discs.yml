@@ -1,25 +1,29 @@
-# This is the root node for all the discs in the configuration file.
-# Each disc will have its own entry under the "discs" node.
+# Root node for all custom discs. Each disc entry is nested under this "discs" node.
 discs:
-  # This is the identifier for the disc. You can name it whatever you like.
-  # YOU MUST ADD A OGG AND A PNG FILE WITH THE SAME NAME IN `source_files` FOLDER.
-  disc_name:
-    # The display name of the disc. This is what will appear in the game when the disc is seen in an inventory or hotbar.
-    display_name: "&6Disc Name"
-    # The material that represents the disc in the game. "PAPER" is used here, but you can use any material.
+  # Unique identifier for each disc. Ensure that the identifier is consistent
+  # with the OGG and PNG files located in the `source_files` folder.
+  # Modifying this identifier after items are distributed will make previously
+  # distributed items unusable.
+  epic_disc:
+    # The display name of the disc as shown in the game. You can use color codes
+    # to customize the appearance of the name.
+    display_name: "&bMusic Disc"
+    # The material type used to represent the disc in-game. "PAPER" is used here,
+    # but you can choose any material that suits your design.
     material: "PAPER"
-    # Custom model data is used to differentiate this item from other items with the same material. 
-    # This allows you to apply a custom texture to the item using a resource pack.
+    # Custom model data value to distinguish this item from others with the same
+    # material. This is used for applying unique textures via a resource pack.
     custom_model_data: 1
-    # Lore is an array of strings that provides additional information about the disc.
-    # Each entry in the array will be a new line in the lore.
+    # Lore provides additional context or flavor text for the disc. Each line in
+    # the lore array will appear as a separate line in the item's lore.
     lore:
-      - "&7Disc Lore Here" # The first line of lore for the disc.
-      - "&7Maybe More Lore?" # The second line of lore for the disc.
-  disc_name_2:
-    display_name: "Disc Name 2"
+      - "&7Vinyls - Epic" # First line of lore.
+      - "&8Epic music by Vinyls!" # Second line of lore.
+
+  legendary_disc:
+    display_name: "&bMusic Disc"
     material: "PAPER"
     custom_model_data: 2
     lore:
-      - "Disc Lore Here"
-      - "Maybe More Lore?"
+      - "&7Vinyls - Legendary"
+      - "&8Legendary music by Vinyls!"

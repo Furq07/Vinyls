@@ -1,45 +1,101 @@
-# Vinyls
+# 💽 **Vinyls**
 
-Vinyls is a plugin designed to add the ability to create configurable custom music discs using resource packs.
+*Enhance your Minecraft experience with custom music discs!*
 
-## Key Features
+---
 
-- **Custom Music Discs:** Easily add your own music tracks to Minecraft.
-- **Performance Optimization:** Developed with server performance in mind, ensuring smooth operation.
-- **User-Friendly:** Includes commands for reloading the configuration and giving discs to players.
-- **Cross-Version Compatibility:** Supports Minecraft versions from 1.16.5 to the latest, ensuring broad applicability.
-- **Configurable:** Utilize a simple `discs.yml` file to configure your custom discs.
-- **Resource Pack Generation:** Automatic Resource Pack generation from the `discs.yml` configuration file.
+## 🎧 **Key Features**
 
-## Available Commands
+| Feature | Description |
+| --- | --- |
+| **🎶 Custom Music Discs** | Easily add your own tracks to Minecraft. |
+| **⚡ Performance Optimization** | Built to ensure smooth server performance. |
+| **💡 User-Friendly** | Simple commands for reloading configuration and giving discs to players. |
+| **⚙ Configurable** | Manage your custom discs via a straightforward `discs.yml` file. |
+| **🎨 Resource Pack Generation** | Automatically generate a resource pack from your configuration. |
+| **🔃 Cross-Version Compatibility** | Supports Minecraft versions from `1.16.5` to the latest. |
+| **🔌 Fabric Support** | Supports Fabric from versions `1.20+` to `1.21.1`. |
 
-- **/vinyls reload:** Reload the plugin's configuration without restarting the server.
-- **/vinyls givedisc <discname> <player>:** Give a specified custom music disc to a player.
+---
 
-## Permissions
+## 💻 **Available Commands**
 
-- `vinyls.admin`: Grants the ability to execute all admin commands of the plugin.
+| Command | Description |
+| --- | --- |
+| **`/vinyls reload`** | Reload the plugin's configuration without a server restart. |
+| **`/vinyls give <disc_name> [player]`** | Grant a custom music disc to a player. |
 
-## Installation Steps
+---
 
-1. Obtain the latest version of Vinyls from the [Modrinth Page](https://modrinth.com/plugin/vinyls).
-2. Place the downloaded `.jar` file into your server's `plugins` directory.
-3. Restart your server to activate the plugin.
-4. Customize the `discs.yml` file located in `plugins/Vinyls/discs.yml` to add your custom music discs.
-5. Load the provided resource pack by uploading it to a site like [mc-packs.net](https://mc-packs.net) then in your `server.properties` file:
-- Add the provided URL to `resource-pack` property.
-- Add the provided SHA1 to `resource-pack-sha1` property.
-- Set `require-resource-pack` property to `true`.
-- Incase you are already using a resource pack, merge it with your existing resource pack.
+## 🔒 **Permissions**
 
-## Note to Server Owners
+| Permission | Description |
+| --- | --- |
+| **`vinyls.admin`** | Grants access to all admin commands. |
 
-To ensure the custom music discs work correctly, Following the Step 5 mentioned above is crucial.
+---
 
-## Support
+## 📩 **Installation Steps**
 
-For any queries or assistance with Vinyls, please visit the [GitHub repository](https://github.com/furq07/vinyls/issues) or [Discord Server](https://discord.gg/7ugrBEKza4).
+1. **[Download Vinyls](https://modrinth.com/plugin/vinyls):** Get the latest version from Modrinth.
+2. **Install:** 
+   - Place the `.jar` file into your server's `plugins` directory.
+   - Example:
+     ```bash
+     /plugins/Vinyls-x.x.x.jar
+     ```
+3. **Activate:**
+   - Restart your server to load the plugin.
+4. **Customize:** 
+   - Edit the `discs.yml` file located in `plugins/Vinyls/discs.yml` to add your custom discs.
+   - Example:
+   ```yaml
+   # Root node for all custom discs. Each disc entry is nested under this "discs" node.
+   discs:
+     # Unique identifier for each disc. Ensure that the identifier is consistent
+     # with the OGG and PNG files located in the `source_files` folder.
+     # Modifying this identifier after items are distributed will make previously
+     # distributed items unusable.
+     epic_disc:
+       # The display name of the disc as shown in the game. You can use color codes
+       # to customize the appearance of the name.
+       display_name: "&bMusic Disc"
+       # The material type used to represent the disc in-game. "PAPER" is used here,
+       # but you can choose any material that suits your design.
+       material: "PAPER"
+       # Custom model data value to distinguish this item from others with the same
+       # material. This is used for applying unique textures via a resource pack.
+       custom_model_data: 1
+       # Lore provides additional context or flavor text for the disc. Each line in
+       # the lore array will appear as a separate line in the item's lore.
+       lore:
+         - "&7Vinyls - Epic" # First line of lore.
+         - "&8Epic music by Vinyls!" # Second line of lore.
+   ```
+5. **Load Resource Pack:**
+   - Upload the resource pack to [mc-packs.net](https://mc-packs.net).
+   - Update the `server.properties` file:
+     | Property | Value |
+     | --- | --- |
+     | `resource-pack` | *URL to resource pack* |
+     | `resource-pack-sha1` | *SHA1 hash of the resource pack* |
+     | `require-resource-pack` | `true` |
+   - **Note:** If you're using an existing resource pack, merge it with the Vinyls resource pack.
+   
+---
 
-## License
+## 📞 **Support**
 
-Vinyls is released under the MIT License.
+For assistance, visit the [GitHub Repository](https://github.com/furq07/vinyls/issues) or join our [Discord Server](https://discord.gg/7ugrBEKza4).
+
+---
+
+## 📜 **License**
+
+Vinyls is released under the [MIT License](https://opensource.org/licenses/MIT).
+
+---
+
+## 🤝 **Partner**
+
+<p align="center"> <a href="https://billing.revivenode.com/aff.php?aff=517"> <img src="https://versions.revivenode.com/resources/banner_wide_one.gif" alt="Partner GIF"> </a> </p> <p align="center"> Use code <b>FURQ</b> for 15% off your order! </p>

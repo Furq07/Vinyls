@@ -2,6 +2,7 @@
 prefix: "§9Vinyls §6»"
 command-unknown: "§7Unknown command. Please check the command syntax."
 discs-not-found: "§7No discs found in the configuration."
+disc-not-found: "§7Requested disc not found in the configuration."
 material-invalid: "§7The specified material is invalid."
 disc-given: "§7Successfully granted §a{player} §7the disc §a{discName}§7."
 disc-received: "§7You have been given the disc §a{discName}§7."

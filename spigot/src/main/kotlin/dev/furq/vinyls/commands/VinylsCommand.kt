@@ -51,10 +51,10 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
         }
         val discName = args[1]
         val discs = discsConfig.getConfigurationSection("discs")?.getKeys(false)
-            ?: return sender.sendMessage("§cNo discs found in config.")
+            ?: return sender.sendMessage("$prefix ${plugin.getMessage("discs-not-found")}")
 
         if (discName !in discs) {
-            sender.sendMessage("$prefix ${plugin.getMessage("discs-not-found")}")
+            sender.sendMessage("$prefix ${plugin.getMessage("disc-not-found")}")
             return
         }
 

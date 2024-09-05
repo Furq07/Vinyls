@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "Adds the ability to create configurable custom music discs using resource packs.",
+  "authors": [
+    "Furq"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/plugin/vinyls",
+    "sources": "https://github.com/Furq07/Vinyls"
+  },
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "main": [ {
+      "value": "dev.furq.vinyls.Vinyls",
+      "adapter": "kotlin"
+    }
+    ]
+  },
+  "mixins": [
+    "vinyls.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15",
+    "minecraft": "${mcdep}",
+    "fabric-api": "*",
+    "fabric-language-kotlin": "*"
+  }
+}

@@ -19,13 +19,10 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.scheduler.BukkitRunnable
-import org.bukkit.scheduler.BukkitTask
 
 class DiscUsageListener(private val plugin: Vinyls) : Listener {
 
     private val discKey = NamespacedKey(plugin, "music_disc")
-    private val particleTasks = mutableMapOf<Location, BukkitTask>()
 
     @EventHandler
     fun PlayerInteractEvent.handleDiscInteract() {
@@ -88,9 +85,6 @@ class DiscUsageListener(private val plugin: Vinyls) : Listener {
             ChatMessageType.ACTION_BAR,
             TextComponent("§bNow Playing: ${discClone.itemMeta?.displayName}")
         )
-        val task = startNoteParticles(block.world, blockLocation)
-        particleTasks[blockLocation] = task
-
         player.swingMainHand()
     }
 
@@ -108,26 +102,5 @@ class DiscUsageListener(private val plugin: Vinyls) : Listener {
 
         block.world.dropItemNaturally(block.location, disc)
         pdc.remove(discKey)
-
-        particleTasks[blockLocation]?.cancel()
-        particleTasks.remove(blockLocation)
-    }
-
-    private fun startNoteParticles(world: World, location: Location): BukkitTask {
-        return object : BukkitRunnable() {
-            override fun run() {
-                world.spawnParticle(
-                    Particle.NOTE,
-                    location.x,
-                    location.y + 0.5,
-                    location.z,
-                    1,
-                    0.5 / 24.0,
-                    0.0,
-                    0.0,
-                    1.0
-                )
-            }
-        }.runTaskTimer(plugin, 0L, 20L)
     }
 }

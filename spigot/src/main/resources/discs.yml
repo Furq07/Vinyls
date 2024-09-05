@@ -1,0 +1,29 @@
+# Root node for all custom discs. Each disc entry is nested under this "discs" node.
+discs:
+  # Unique identifier for each disc. Ensure that the identifier is consistent
+  # with the OGG and PNG files located in the `source_files` folder.
+  # Modifying this identifier after items are distributed will make previously
+  # distributed items unusable.
+  epic_disc:
+    # The display name of the disc as shown in the game. You can use color codes
+    # to customize the appearance of the name.
+    display_name: "&bMusic Disc"
+    # The material type used to represent the disc in-game. "PAPER" is used here,
+    # but you can choose any material that suits your design.
+    material: "PAPER"
+    # Custom model data value to distinguish this item from others with the same
+    # material. This is used for applying unique textures via a resource pack.
+    custom_model_data: 1
+    # Lore provides additional context or flavor text for the disc. Each line in
+    # the lore array will appear as a separate line in the item's lore.
+    lore:
+      - "&7Vinyls - Epic" # First line of lore.
+      - "&8Epic music by Vinyls!" # Second line of lore.
+
+  legendary_disc:
+    display_name: "&bMusic Disc"
+    material: "PAPER"
+    custom_model_data: 2
+    lore:
+      - "&7Vinyls - Legendary"
+      - "&8Legendary music by Vinyls!"

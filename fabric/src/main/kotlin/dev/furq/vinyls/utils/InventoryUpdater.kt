@@ -22,19 +22,19 @@ import net.minecraft.item.ItemStack
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import org.yaml.snakeyaml.Yaml
-import java.io.File
-
+import dev.furq.spindle.Config
 
 object InventoryUpdater {
-    private val discsConfigFile = File("config/vinyls/discs.yml")
-    private var discsConfig = loadYamlConfig(discsConfigFile)
+    private var discsParser = Config.load("discs.yml")
 
     fun updatePlayerInventory(inventory: PlayerInventory) {
-        discsConfig = loadYamlConfig(discsConfigFile)
         for (index in 0 until inventory.size()) {
             val item = inventory.getStack(index)
-            if (item.get(DataComponentTypes.CUSTOM_DATA)?.copyNbt()?.contains("minecraft:music_disc") != null) {
+            //? if <1.20.6 {
+            if (item.nbt != null && item.nbt!!.contains("vinyls:music_disc")) {
+                //?} else {
+                /*if (item.get(DataComponentTypes.CUSTOM_DATA)?.copyNbt()?.contains("minecraft:music_disc") != null) {
+                *///?}
                 updateItemIfNeeded(item, inventory, index)
             }
         }
@@ -51,18 +51,15 @@ object InventoryUpdater {
         *///?}
 
         val discName = itemNbt.getString("vinyls:music_disc") ?: return item
-        val discConfig = discsConfig["discs"] as? Map<String, Map<String, Any>> ?: return item
-        val discDetails = discConfig[discName] ?: return item
-
-        val itemId = discDetails["material"].toString().lowercase()
+        val itemId = discsParser.getString("discs.$discName.material").lowercase()
         //? if <1.21 {
         val material = Registries.ITEM[Identifier(itemId)]
         //?} else {
         /*val material = Registries.ITEM[Identifier.ofVanilla(itemId)]
         *///?}
-        val customModelData = (discDetails["custom_model_data"] ?: 1000) as Int
-        val displayName = (discDetails["display_name"] ?: "&bCustom Disc") as String
-        val lore = (discDetails["lore"] ?: "Vinyls - Custom") as List<String>
+        val customModelData = discsParser.getInt("discs.$discName.custom_model_data", 1000)
+        val displayName = discsParser.getString("discs.$discName.display_name", "§ bCustom Disc")
+        val lore = discsParser.getList("discs.$discName.lore", listOf("§7Vinyls - Custom")) as List<String>
 
         var updateNeeded = false
         var newItem = item.copy() ?: return item
@@ -86,11 +83,11 @@ object InventoryUpdater {
         val newNbt = newItem.nbt ?: NbtCompound()
         //?} else {
         //?}
-        if (displayName.replace("&", "§") != newItem.name.string) {
+        if (displayName != newItem.name.string) {
             //? if <1.20.6 {
-            newItem.setCustomName(Text.literal(displayName.replace("&", "§")))
+            newItem.setCustomName(Text.literal(displayName))
             //?} else {
-            /*newItem.set(DataComponentTypes.CUSTOM_NAME, Text.literal(displayName.replace("&", "§")))
+            /*newItem.set(DataComponentTypes.CUSTOM_NAME, Text.literal(displayName))
             *///?}
             updateNeeded = true
         }
@@ -115,11 +112,11 @@ object InventoryUpdater {
             /*val jsonOps = JsonOps.INSTANCE
             if (lore != newNbt.getList("Lore", 8)?.map { TextCodecs.STRINGIFIED_CODEC.decode(jsonOps, JsonParser.parseString(it.asString())).resultOrPartial { e -> throw RuntimeException(e) }.get() }) {
             *///?} else {
-            /*if (newItem.get(DataComponentTypes.LORE) != LoreComponent(lore.map { Text.literal(it.replace("&", "§")) })) {
+            /*if (newItem.get(DataComponentTypes.LORE) != LoreComponent(lore.map { Text.literal(it) })) {
             *///?}
             //? if <1.20.4 {
             val displayLore = NbtList()
-            lore.map { Text.literal(it.replace("&", "§")) }
+            lore.map { Text.literal(it) }
                 .map { Text.Serializer.toJson(it) }
                 .map { NbtString.of(it) }
                 .forEach { displayLore.add(it) }
@@ -127,13 +124,13 @@ object InventoryUpdater {
             //?} elif =1.20.4 {
             /*val displayLore = NbtList()
             val jsonOps = JsonOps.INSTANCE
-            lore.map { Text.literal(it.replace("&", "§")) }
+            lore.map { Text.literal(it) }
                 .map { TextCodecs.STRINGIFIED_CODEC.encodeStart(jsonOps, it).resultOrPartial { e -> throw RuntimeException(e) }.get() }
                 .map { NbtString.of(it.asString) }
                 .forEach { displayLore.add(it) }
             newNbt.getCompound("display").put("Lore", displayLore)
             *///?} else {
-            /*val loreTextComponents: List<Text> = lore.map { Text.literal(it.replace("&", "§")) }
+            /*val loreTextComponents: List<Text> = lore.map { Text.literal(it) }
             newItem.set(DataComponentTypes.LORE, LoreComponent(loreTextComponents))
             *///?}
             updateNeeded = true
@@ -146,13 +143,5 @@ object InventoryUpdater {
             inventory.setStack(index, newItem)
         }
         return newItem
-    }
-
-    private fun loadYamlConfig(file: File): Map<String, Any> {
-        return if (file.exists()) {
-            Yaml().load(file.inputStream()) ?: emptyMap()
-        } else {
-            emptyMap()
-        }
     }
 }

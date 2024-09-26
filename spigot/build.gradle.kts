@@ -1,7 +1,7 @@
 plugins {
     java
     id("io.github.goooler.shadow") version "8.1.7"
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.0.20"
 }
 
 group = project.property("mod.group").toString()

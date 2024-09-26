@@ -2,9 +2,8 @@ package dev.furq.vinyls.utils
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import dev.furq.spindle.Config
 import dev.furq.vinyls.Vinyls
-import org.yaml.snakeyaml.DumperOptions
-import org.yaml.snakeyaml.Yaml
 import java.io.*
 import java.lang.reflect.Type
 import java.util.zip.ZipEntry
@@ -12,15 +11,10 @@ import java.util.zip.ZipOutputStream
 
 class ResourcePackGenerator(private val mod: Vinyls) {
 
-    private val yaml: Yaml = Yaml(DumperOptions().apply {
-        indent = 2
-        isPrettyFlow = true
-    })
-
     private val gson = Gson()
 
-    fun generateResourcePack(discsConfigFile: File, sourceFolder: File, targetFolder: File) {
-        val discsConfig = loadYamlConfig(discsConfigFile)
+    fun generateResourcePack(sourceFolder: File, targetFolder: File) {
+        val discsParser = Config.load("discs.yml")
         val soundsDir = File(targetFolder, "assets/minecraft/sounds/records").apply { mkdirs() }
         val texturesItemDir = File(targetFolder, "assets/minecraft/textures/item").apply { mkdirs() }
         val modelsItemDir = File(targetFolder, "assets/minecraft/models/item").apply { mkdirs() }
@@ -35,11 +29,10 @@ class ResourcePackGenerator(private val mod: Vinyls) {
 
         val itemModelDataMap = mutableMapOf<String, MutableMap<String, Any>>()
         val existingDiscNames = mutableSetOf<String>()
-
-        val discsSection = discsConfig["discs"] as Map<String, Map<String, Any>>?
-        discsSection?.forEach { (discName, discConfig) ->
-            val material = (discConfig["material"] as String).lowercase()
-            val customModelData = discConfig["custom_model_data"] as Int
+        val discs = discsParser.getMap("discs") as Map<String, Map<String, Object>>
+        discs.forEach { (discName, discData) ->
+            val material = discData["material"] as String
+            val customModelData = discData["custom_model_data"] as Int
 
             existingDiscNames.add(discName)
 
@@ -115,12 +108,6 @@ class ResourcePackGenerator(private val mod: Vinyls) {
             "pack.mcmeta"
         ).writeText("""{"pack":{"description":"Vinyls Pack Generation","pack_format":34}}""".trimIndent())
         zipResourcePack(targetFolder)
-    }
-
-    private fun loadYamlConfig(file: File): Map<String, Any> {
-        FileInputStream(file).use { input ->
-            return yaml.load(input)
-        }
     }
 
     private fun saveJsonConfig(file: File, data: Map<String, Any>) {

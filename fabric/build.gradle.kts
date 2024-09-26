@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `maven-publish`
     id("fabric-loom")
-    id("org.jetbrains.kotlin.jvm") version("2.0.20")
+    kotlin("jvm") version "2.0.20"
 }
 
 class ModData {
@@ -26,6 +26,10 @@ version = "fabric-${mod.version}+$mcVersion"
 group = mod.group
 base { archivesName.set(mod.id) }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     fun fapi(vararg modules: String) {
         modules.forEach { fabricApi.module(it, deps["fapi"]) }
@@ -38,8 +42,13 @@ dependencies {
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${deps["fabric_api"]}")
     vineflowerDecompilerClasspath("org.vineflower:vineflower:1.10.1")
-    implementation("org.yaml:snakeyaml:2.2")
-    include("org.yaml:snakeyaml:2.2")?.let { runtimeOnly(it) }
+    modImplementation(include("org.yaml", "snakeyaml", "2.2"))
+    modImplementation(include("dev.furq", "spindle", "1.0.0"))
+    modImplementation(include("net.kyori", "adventure-text-serializer-legacy", "4.17.0"))
+    modImplementation(include("net.kyori", "adventure-api", "4.17.0"))
+    modImplementation(include("net.kyori", "adventure-key", "4.17.0"))
+    modImplementation(include("net.kyori", "adventure-text-minimessage", "4.17.0"))
+    modImplementation(include("net.kyori", "examination-api", "1.3.0"))
 }
 
 loom {
@@ -69,7 +78,8 @@ tasks.withType<KotlinCompile> {
 
 java {
     withSourcesJar()
-    val javaVersion = if (stonecutter.compare(mcVersion, "1.20.6") >= 0) JavaVersion.VERSION_21 else JavaVersion.VERSION_17
+    val javaVersion =
+        if (stonecutter.compare(mcVersion, "1.20.6") >= 0) JavaVersion.VERSION_21 else JavaVersion.VERSION_17
     targetCompatibility = javaVersion
     sourceCompatibility = javaVersion
 }

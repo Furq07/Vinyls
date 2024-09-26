@@ -24,6 +24,7 @@ import net.minecraft.nbt.NbtList
 //?}
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
+import dev.furq.spindle.Config
 import java.util.concurrent.CompletableFuture
 import net.minecraft.item.ItemStack
 import net.minecraft.registry.Registries
@@ -31,18 +32,13 @@ import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import org.yaml.snakeyaml.Yaml
-import java.io.File
 import java.util.*
 
 class VinylsCommand(private val mod: Vinyls) {
 
-    private val discsConfigFile = File("config/${mod.modID}/discs.yml")
-    private val messageConfigFile = File("config/${mod.modID}/messages.yml")
-    private var discsConfig = loadYamlConfig(discsConfigFile)
-    private var messageConfig = loadYamlConfig(messageConfigFile)
-    private val prefix = messageConfig["prefix"]?.toString() ?: "§9Vinyls §6»"
-
+    private var discsParser = Config.load("discs.yml")
+    private var messageParser = Config.load("messages.yml")
+    private var prefix = messageParser.getString("prefix", "§9Vinyls §6»")
     init {
         CommandRegistrationCallback.EVENT.register { dispatcher: CommandDispatcher<ServerCommandSource>, _: CommandRegistryAccess?, _: CommandManager.RegistrationEnvironment? ->
             dispatcher.register(
@@ -60,7 +56,7 @@ class VinylsCommand(private val mod: Vinyls) {
                             .executes { context ->
                                 handleGiveDisc(
                                     context.source,
-                                    StringArgumentType.getString(context, "discName")
+                                    StringArgumentType.getString(context, "disc_name")
                                 )
                                 1
                             }
@@ -71,7 +67,7 @@ class VinylsCommand(private val mod: Vinyls) {
                                 .executes { context ->
                                     handleGiveDisc(
                                         context.source,
-                                        StringArgumentType.getString(context, "discName"),
+                                        StringArgumentType.getString(context, "disc_name"),
                                         StringArgumentType.getString(context, "player")
                                     )
                                     1
@@ -79,7 +75,7 @@ class VinylsCommand(private val mod: Vinyls) {
                         )
                     )
                     .executes { context ->
-                        context.source.sendError(Text.literal("$prefix ${messageConfig["command-unknown"]}"))
+                        context.source.sendError(Text.literal("$prefix ${messageParser.getString("command-unknown")}"))
                         0
                     }
             )
@@ -88,7 +84,9 @@ class VinylsCommand(private val mod: Vinyls) {
 
     private fun handleReload(source: ServerCommandSource) {
         mod.loadConfig()
-        discsConfig = loadYamlConfig(discsConfigFile)
+        discsParser = Config.load("discs.yml")
+        messageParser = Config.load("messages.yml")
+        prefix = messageParser.getString("prefix", "&9Vinyls &6»")
         source.server.worlds.forEach {
             it.players.forEach { player ->
                 InventoryUpdater.updatePlayerInventory(player.inventory)
@@ -98,51 +96,49 @@ class VinylsCommand(private val mod: Vinyls) {
     }
 
     private fun handleGiveDisc(source: ServerCommandSource, discName: String, playerName: String? = null) {
-        val discConfig = discsConfig["discs"] as Map<String, Map<String, Any>>?
-
-        if (discConfig.isNullOrEmpty()) {
-            return source.sendError(Text.literal("$prefix ${messageConfig["discs-not-found"]}"))
-        }
-
-        val discDetails = discConfig[discName]
-            ?: return source.sendError(Text.literal("$prefix ${messageConfig["disc-not-found"]}"))
-
+        val discs = discsParser.getMap("discs")
+            ?: return source.sendError(Text.literal("$prefix ${messageParser.getString("discs-not-found")}"))
+        if (discsParser.getNestedMap(
+                discs,
+                discName
+            ) == null
+        ) return source.sendError(Text.literal("$prefix ${messageParser.getString("disc-not-found")}"))
         //? if <1.21 {
-        val material = Registries.ITEM[Identifier(discDetails["material"].toString().lowercase())]
+        val material = Registries.ITEM[Identifier(discsParser.getString("discs.$discName.material").lowercase())]
         //?} else {
-        /*val material = Registries.ITEM[Identifier.ofVanilla(discDetails["material"].toString().lowercase())]
+        /*val material = Registries.ITEM[Identifier.ofVanilla(discsParser.getString("discs.$discName.material").lowercase())]
         *///?}
 
-        val customModelData = discDetails["custom_model_data"] as Int
-        val displayName = discDetails["display_name"] as String
-        val lore = discDetails["lore"] as List<String>
+        val customModelData = discsParser.getInt("discs.$discName.custom_model_data")
+        val displayName = discsParser.getString("discs.$discName.display_name")
+        val lore = discsParser.getList("discs.$discName.lore") as List<String>
 
         val discItem = ItemStack(material).apply {
             //? if <1.20.4 {
             val displayLore = NbtList()
-            lore.map { Text.literal(it.replace("&", "§")) }
+            lore.map { Text.literal(it) }
                 .map { Text.Serializer.toJson(it) }
                 .map { NbtString.of(it) }
                 .forEach { displayLore.add(it) }
             //?} elif =1.20.4 {
             /*val displayLore = NbtList()
             val jsonOps = JsonOps.INSTANCE
-            lore?.map { Text.literal(it.replace("&", "§")) }
+            lore?.map { Text.literal(it) }
                 ?.map { TextCodecs.STRINGIFIED_CODEC.encodeStart(jsonOps, it).resultOrPartial { e -> throw RuntimeException(e) }.get() }
                 ?.map { NbtString.of(it.asString) }
                 ?.forEach { displayLore.add(it) }
             *///?} else {
-            /*val loreTextComponents: List<Text> = lore.map { Text.literal(it.replace("&", "§")) }
+            /*val loreTextComponents: List<Text> = lore.map { Text.literal(it) }
             *///?}
 
             //? if <1.20.6 {
-            setCustomName(Text.literal(displayName.replace("&", "§")))
+            setCustomName(Text.literal(displayName))
             getOrCreateSubNbt("display").put("Lore", displayLore)
             orCreateNbt.putInt("CustomModelData", customModelData)
             orCreateNbt.putString("${mod.modID}:music_disc", discName)
             orCreateNbt.putString("${mod.modID}:unique_id", UUID.randomUUID().toString())
             //?} else {
-            /*set(DataComponentTypes.CUSTOM_NAME, Text.literal(displayName.replace("&", "§")))
+            /*set(DataComponentTypes.CUSTOM_NAME, Text.literal(displayName))
             val nbt = get(DataComponentTypes.CUSTOM_DATA)?.copyNbt() ?: NbtCompound().apply {
                 putString("${mod.modID}:music_disc", discName)
             }
@@ -160,7 +156,7 @@ class VinylsCommand(private val mod: Vinyls) {
             source.sendMessage(
                 Text.literal(
                     "$prefix ${
-                        messageConfig["disc-given"]?.toString()
+                        messageParser.getString("disc-given")
                             ?.replace("{player}", targetPlayer.name.string)
                             ?.replace("{discName}", discName)
                     }"
@@ -169,20 +165,19 @@ class VinylsCommand(private val mod: Vinyls) {
             targetPlayer.sendMessage(
                 Text.literal(
                     "$prefix ${
-                        messageConfig["disc-received"]?.toString()
+                        messageParser.getString("disc-received")
                             ?.replace("{discName}", discName)
                     }"
                 )
             )
         } else {
-            source.sendError(Text.literal("$prefix ${messageConfig["player-not-found"]}"))
+            source.sendError(Text.literal("$prefix ${messageParser.getString("player-not-found")}"))
         }
     }
 
     private fun suggestDiscs(builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
-        val discConfig = discsConfig["discs"] as Map<String, Map<String, Any>>?
-        val discNames = discConfig?.keys?.toList() ?: emptyList()
-        return suggest(builder, discNames)
+        val discs = discsParser.getMap("discs").keys.toList()
+        return suggest(builder, discs)
     }
 
     private fun suggestPlayers(
@@ -203,13 +198,5 @@ class VinylsCommand(private val mod: Vinyls) {
             builder.suggest(suggestion)
         }
         return builder.buildFuture()
-    }
-
-    private fun loadYamlConfig(file: File): Map<String, Any> {
-        return if (file.exists()) {
-            Yaml().load(file.inputStream()) ?: emptyMap()
-        } else {
-            emptyMap()
-        }
     }
 }

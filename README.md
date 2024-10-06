@@ -86,7 +86,7 @@
 
 ## 📞 **Support**
 
-For assistance, visit the [GitHub Repository](https://github.com/furq07/vinyls/issues) or join our [Discord Server](https://discord.gg/7ugrBEKza4).
+For assistance, visit the [GitHub Repository](https://github.com/furq07/vinyls/issues) or join our [Discord Server](https://discord.gg/XhZzmvzPDV).
 
 ---
 

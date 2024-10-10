@@ -32,7 +32,7 @@ tasks.build {
 }
 
 tasks.processResources {
-    val props = mapOf("version" to version)
+    val props = mapOf("version" to project.property("mod.version").toString())
     inputs.properties(props)
     filteringCharset = "UTF-8"
     filesMatching("plugin.yml") {

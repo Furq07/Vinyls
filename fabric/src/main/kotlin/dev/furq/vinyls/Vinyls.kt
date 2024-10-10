@@ -14,11 +14,11 @@ import java.io.File
 class Vinyls : ModInitializer {
 
     companion object {
-        val modID = "vinyls"
+        const val modID = "vinyls"
         val logger: Logger = LoggerFactory.getLogger(modID)
         lateinit var messages: Parser
         lateinit var discs: Parser
-        val prefix = messages.getString("prefix", "&9Vinyls &6»")
+        lateinit var prefix: String
     }
 
     private lateinit var vinylsCommand: VinylsCommand
@@ -28,6 +28,7 @@ class Vinyls : ModInitializer {
     override fun onInitialize() {
         try {
             loadConfig()
+            prefix = messages.getString("prefix", "&9Vinyls &6»")
             vinylsCommand = VinylsCommand(this)
             inventoryUpdateListener = InventoryUpdateListener()
             logger.info("Thank you for using my mod - Furq")

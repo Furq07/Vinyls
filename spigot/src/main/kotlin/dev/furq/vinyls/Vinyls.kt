@@ -18,7 +18,7 @@ class Vinyls : JavaPlugin() {
     companion object {
         lateinit var messages: YamlConfiguration
         lateinit var discs: YamlConfiguration
-        val prefix = messages.getString("prefix", "&9Vinyls &6»")
+        lateinit var prefix: String
     }
 
     private lateinit var discUsageListener: DiscUsageListener
@@ -32,6 +32,7 @@ class Vinyls : JavaPlugin() {
         CustomBlockData.registerListener(this)
 
         loadConfig()
+        prefix = messages.getString("prefix", "&9Vinyls &6»")!!
 
         getCommand("vinyls")?.setExecutor(VinylsCommand(this))
         getCommand("vinyls")?.tabCompleter = TabCompleter()
@@ -71,7 +72,7 @@ class Vinyls : JavaPlugin() {
 
     private fun updateChecker() {
         UpdateChecker(this, UpdateCheckSource.SPIGOT, "117674")
-            .setDownloadLink("https://modrinth.com/plugin/vinyls")
+            .setDownloadLink("https://modrinth.com/plugin/vinyls") 
             .setNotifyOpsOnJoin(true)
             .setUserAgent(UserAgentBuilder().addPluginNameAndVersion())
             .checkNow()

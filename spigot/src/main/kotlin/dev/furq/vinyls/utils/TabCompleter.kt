@@ -1,13 +1,11 @@
 package dev.furq.vinyls.utils
 
-import dev.furq.vinyls.Vinyls
+import dev.furq.vinyls.Vinyls.Companion.discs
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
-import org.bukkit.configuration.file.YamlConfiguration
-import java.io.File
 
-class TabCompleter(private val plugin: Vinyls) : TabCompleter {
+class TabCompleter : TabCompleter {
     override fun onTabComplete(
         sender: CommandSender,
         command: Command,
@@ -20,10 +18,7 @@ class TabCompleter(private val plugin: Vinyls) : TabCompleter {
             } else if (args.size == 2) {
                 when (args[0].lowercase()) {
                     "give" -> {
-                        val discsConfigFile = File(plugin.dataFolder, "discs.yml")
-                        if (!discsConfigFile.exists()) plugin.saveResource("discs.yml", false)
-                        val discsConfig = YamlConfiguration.loadConfiguration(discsConfigFile)
-                        val discs = discsConfig.getConfigurationSection("discs")?.getKeys(false)!!
+                        val discs = discs.getConfigurationSection("discs")?.getKeys(false)!!
                         return discs.toList()
                     }
 

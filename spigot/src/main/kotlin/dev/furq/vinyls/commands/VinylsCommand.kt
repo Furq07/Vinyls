@@ -1,7 +1,8 @@
 package dev.furq.vinyls.commands
 
 import dev.furq.vinyls.Vinyls
-import dev.furq.vinyls.utils.ResourcePackGenerator
+import dev.furq.vinyls.Vinyls.Companion.discs
+import dev.furq.vinyls.Vinyls.Companion.prefix
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -9,18 +10,12 @@ import org.bukkit.NamespacedKey
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import java.io.File
 import java.util.UUID
 
 class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
-
-    private val discsConfigFile = File(plugin.dataFolder, "discs.yml")
-    private var discsConfig = YamlConfiguration.loadConfiguration(discsConfigFile)
-    private val prefix = plugin.getMessage("prefix")
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (command.label.equals("vinyls", ignoreCase = true) && args.isNotEmpty()) {
@@ -34,13 +29,7 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
     }
 
     private fun handleReload(sender: CommandSender) {
-        plugin.reloadConfig()
-        discsConfig = YamlConfiguration.loadConfiguration(discsConfigFile)
-        val sourceFolder = File(plugin.dataFolder, "source_files")
-        val targetFolder = File(plugin.dataFolder, "resource_pack")
-        if (!sourceFolder.exists()) sourceFolder.mkdirs()
-        if (!targetFolder.exists()) targetFolder.mkdirs()
-        ResourcePackGenerator(plugin).generateResourcePack(discsConfig, sourceFolder, targetFolder)
+        plugin.loadConfig()
         sender.sendMessage("$prefix §7Reloaded Vinyls successfully!")
     }
 
@@ -50,15 +39,15 @@ class VinylsCommand(private val plugin: Vinyls) : CommandExecutor {
             return
         }
         val discName = args[1]
-        val discs = discsConfig.getConfigurationSection("discs")?.getKeys(false)
+        val discsMap = discs.getConfigurationSection("discs")?.getKeys(false)
             ?: return sender.sendMessage("$prefix ${plugin.getMessage("discs-not-found")}")
 
-        if (discName !in discs) {
+        if (discName !in discsMap) {
             sender.sendMessage("$prefix ${plugin.getMessage("disc-not-found")}")
             return
         }
 
-        val discConfig = discsConfig.getConfigurationSection("discs.$discName")!!
+        val discConfig = discs.getConfigurationSection("discs.$discName")!!
 
         val material = discConfig.getString("material")?.let { Material.valueOf(it) }
             ?: return sender.sendMessage("$prefix ${plugin.getMessage("material-invalid")}")

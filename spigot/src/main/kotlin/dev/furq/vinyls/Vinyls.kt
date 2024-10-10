@@ -14,9 +14,15 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 class Vinyls : JavaPlugin() {
+
+    companion object {
+        lateinit var messages: YamlConfiguration
+        lateinit var discs: YamlConfiguration
+        val prefix = messages.getString("prefix", "&9Vinyls &6»")
+    }
+
     private lateinit var discUsageListener: DiscUsageListener
     private lateinit var inventoryUpdateListener: InventoryUpdateListener
-    private lateinit var messagesConfig: YamlConfiguration
 
     override fun onEnable() {
         discUsageListener = DiscUsageListener(this)
@@ -25,31 +31,42 @@ class Vinyls : JavaPlugin() {
         server.pluginManager.registerEvents(inventoryUpdateListener, this)
         CustomBlockData.registerListener(this)
 
-        saveDefaultConfig()
-        reloadConfig()
-
-        val messagesConfigFile = File(dataFolder, "messages.yml")
-        if (!messagesConfigFile.exists()) saveResource("messages.yml", false)
-        messagesConfig = YamlConfiguration.loadConfiguration(messagesConfigFile)
-
-        val discsConfigFile = File(dataFolder, "discs.yml")
-        if (!discsConfigFile.exists()) saveResource("discs.yml", false)
-        val discsConfig = YamlConfiguration.loadConfiguration(discsConfigFile)
-
-        val sourceFolder = File(dataFolder, "source_files")
-        if (!sourceFolder.exists()) sourceFolder.mkdirs()
-        val targetFolder = File(dataFolder, "resource_pack")
-        if (!targetFolder.exists()) targetFolder.mkdirs()
-
-        ResourcePackGenerator(this).generateResourcePack(discsConfig, sourceFolder, targetFolder)
+        loadConfig()
 
         getCommand("vinyls")?.setExecutor(VinylsCommand(this))
-        getCommand("vinyls")?.tabCompleter = TabCompleter(this)
+        getCommand("vinyls")?.tabCompleter = TabCompleter()
 
         logger.info("Thank you for using my plugin - Furq")
 
         val config = this.config
         if (config.getBoolean("update-checker")) updateChecker()
+    }
+
+    fun loadConfig() {
+        try {
+            saveDefaultConfig()
+            reloadConfig()
+
+            val messagesConfigFile = File(dataFolder, "messages.yml")
+            if (!messagesConfigFile.exists()) saveResource("messages.yml", false)
+            messages = YamlConfiguration.loadConfiguration(messagesConfigFile)
+
+            val discsConfigFile = File(dataFolder, "discs.yml")
+            if (!discsConfigFile.exists()) saveResource("discs.yml", false)
+            discs = YamlConfiguration.loadConfiguration(discsConfigFile)
+
+            val sourceFolder = File(dataFolder, "source_files")
+            if (!sourceFolder.exists()) sourceFolder.mkdirs()
+            val targetFolder = File(dataFolder, "resource_pack")
+            if (!targetFolder.exists()) targetFolder.mkdirs()
+            ResourcePackGenerator(logger).generateResourcePack(
+                discs,
+                sourceFolder,
+                targetFolder
+            )
+        } catch (e: Exception) {
+            logger.info("An error occurred while loading configuration\n$e")
+        }
     }
 
     private fun updateChecker() {
@@ -61,6 +78,6 @@ class Vinyls : JavaPlugin() {
     }
 
     fun getMessage(key: String): String {
-        return messagesConfig.getString(key, "Message not found")!!
+        return messages.getString(key, "Message not found")!!
     }
 }

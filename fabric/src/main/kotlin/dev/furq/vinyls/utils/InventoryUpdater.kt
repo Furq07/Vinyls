@@ -17,15 +17,14 @@ import com.google.gson.JsonParser
 import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtString
 //?}
+import dev.furq.vinyls.Vinyls.Companion.discs
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import dev.furq.spindle.Config
 
 object InventoryUpdater {
-    private var discsParser = Config.load("discs.yml")
 
     fun updatePlayerInventory(inventory: PlayerInventory) {
         for (index in 0 until inventory.size()) {
@@ -51,15 +50,15 @@ object InventoryUpdater {
         *///?}
 
         val discName = itemNbt.getString("vinyls:music_disc") ?: return item
-        val itemId = discsParser.getString("discs.$discName.material").lowercase()
+        val itemId = discs.getString("discs.$discName.material").lowercase()
         //? if <1.21 {
         val material = Registries.ITEM[Identifier(itemId)]
         //?} else {
         /*val material = Registries.ITEM[Identifier.ofVanilla(itemId)]
         *///?}
-        val customModelData = discsParser.getInt("discs.$discName.custom_model_data", 1000)
-        val displayName = discsParser.getString("discs.$discName.display_name", "§ bCustom Disc")
-        val lore = discsParser.getList("discs.$discName.lore", listOf("§7Vinyls - Custom")) as List<String>
+        val customModelData = discs.getInt("discs.$discName.custom_model_data", 1000)
+        val displayName = discs.getString("discs.$discName.display_name", "§ bCustom Disc")
+        val lore = discs.getList("discs.$discName.lore", listOf("§7Vinyls - Custom")) as List<String>
 
         var updateNeeded = false
         var newItem = item.copy() ?: return item

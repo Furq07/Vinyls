@@ -2,19 +2,18 @@ package dev.furq.vinyls.utils
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import dev.furq.spindle.Config
-import dev.furq.vinyls.Vinyls
+import dev.furq.spindle.Parser
+import org.slf4j.Logger
 import java.io.*
 import java.lang.reflect.Type
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-class ResourcePackGenerator(private val mod: Vinyls) {
+class ResourcePackGenerator(private val logger: Logger) {
 
     private val gson = Gson()
 
-    fun generateResourcePack(sourceFolder: File, targetFolder: File) {
-        val discsParser = Config.load("discs.yml")
+    fun generateResourcePack(discsConfig: Parser, sourceFolder: File, targetFolder: File) {
         val soundsDir = File(targetFolder, "assets/minecraft/sounds/records").apply { mkdirs() }
         val texturesItemDir = File(targetFolder, "assets/minecraft/textures/item").apply { mkdirs() }
         val modelsItemDir = File(targetFolder, "assets/minecraft/models/item").apply { mkdirs() }
@@ -29,7 +28,7 @@ class ResourcePackGenerator(private val mod: Vinyls) {
 
         val itemModelDataMap = mutableMapOf<String, MutableMap<String, Any>>()
         val existingDiscNames = mutableSetOf<String>()
-        val discs = discsParser.getMap("discs") as Map<String, Map<String, Object>>
+        val discs = discsConfig.getMap("discs") as Map<String, Map<String, Any>>
         discs.forEach { (discName, discData) ->
             val material = discData["material"] as String
             val customModelData = discData["custom_model_data"] as Int
@@ -127,7 +126,7 @@ class ResourcePackGenerator(private val mod: Vinyls) {
         if (source.exists()) {
             source.copyTo(destination, overwrite = true)
         } else {
-            mod.logger.info("\u00A74WARNING\u00A7a: ${source.absolutePath} does not exist.")
+            logger.info("\u00A74WARNING\u00A7a: ${source.absolutePath} does not exist.")
         }
     }
 

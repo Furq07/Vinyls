@@ -1,15 +1,18 @@
 package dev.furq.vinyls.utils
 
-import dev.furq.vinyls.Vinyls
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.bukkit.configuration.file.FileConfiguration
-import org.bukkit.configuration.file.YamlConfiguration
-import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
+import java.io.*
+import java.lang.reflect.Type
+import java.util.logging.Logger
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-class ResourcePackGenerator(private val plugin: Vinyls) {
+class ResourcePackGenerator(private val logger: Logger) {
+
+    private val gson = Gson()
+
     fun generateResourcePack(discsConfig: FileConfiguration, sourceFolder: File, targetFolder: File) {
         val soundsDir = File(targetFolder, "assets/minecraft/sounds/records").apply { mkdirs() }
         val texturesItemDir = File(targetFolder, "assets/minecraft/textures/item").apply { mkdirs() }
@@ -17,25 +20,19 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
         val modelsDir = File(targetFolder, "assets/minecraft/models").apply { mkdirs() }
         val soundsJsonFile = File(targetFolder, "assets/minecraft/sounds.json")
 
-        val soundsConfig = YamlConfiguration.loadConfiguration(soundsJsonFile)
-        val soundsData = mutableMapOf<String, Any>()
-
-        if (soundsJsonFile.exists()) {
-            val rawSoundsData = soundsConfig.getValues(false)
-            rawSoundsData.forEach { (key, value) ->
-                if (value is Map<*, *>) {
-                    soundsData[key] = value
-                }
-            }
+        val soundsData = if (soundsJsonFile.exists()) {
+            loadJsonConfig(soundsJsonFile).toMutableMap()
+        } else {
+            mutableMapOf()
         }
 
         val itemModelDataMap = mutableMapOf<String, MutableMap<String, Any>>()
         val existingDiscNames = mutableSetOf<String>()
 
-        discsConfig.getConfigurationSection("discs")?.getKeys(false)?.forEach { discName ->
-            val discConfig = discsConfig.getConfigurationSection("discs.$discName")!!
-            val material = discConfig.getString("material")!!.lowercase()
-            val customModelData = discConfig.getInt("custom_model_data")
+        val discs = discsConfig.getConfigurationSection("discs") as Map<String, Map<String, Any>>
+        discs.forEach { (discName, discData) ->
+            val material = discData["material"] as String
+            val customModelData = discData["custom_model_data"] as Int
 
             existingDiscNames.add(discName)
 
@@ -49,7 +46,7 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
 
             copyFile(textureFile, File(texturesItemDir, "$discName.png"))
 
-            val texturePath = if (textureExists) "$discName" else "minecraft:item/music_disc_cat"
+            val texturePath = if (textureExists) discName else "minecraft:item/music_disc_cat"
 
             val itemModelData = itemModelDataMap.getOrPut(material) { mutableMapOf() }
             itemModelData["parent"] = "minecraft:item/generated"
@@ -67,8 +64,8 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
             if (textureExists) {
                 val discModelPath = File(modelsDir, "$discName.json")
                 val discModelData =
-                    mapOf("parent" to "item/generated", "textures" to mapOf("layer0" to "item/$discName"))
-                discModelPath.writeText(discModelData.toJson())
+                    mapOf("parent" to "minecraft:item/generated", "textures" to mapOf("layer0" to "item/$discName"))
+                saveJsonConfig(discModelPath, discModelData)
             }
         }
 
@@ -87,8 +84,8 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
         }
 
         itemModelDataMap.forEach { (material, itemModelData) ->
-            val itemModelPath = File(modelsItemDir, "${material}.json")
-            itemModelPath.writeText(itemModelData.toJson())
+            val itemModelPath = File(modelsItemDir, "$material.json")
+            saveJsonConfig(itemModelPath, itemModelData)
         }
 
         modelsItemDir.listFiles()?.forEach { materialFile ->
@@ -105,7 +102,7 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
             }
         }
 
-        soundsJsonFile.writeText(soundsData.toJson())
+        saveJsonConfig(soundsJsonFile, soundsData)
         File(
             targetFolder,
             "pack.mcmeta"
@@ -113,11 +110,24 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
         zipResourcePack(targetFolder)
     }
 
+    private fun saveJsonConfig(file: File, data: Map<String, Any>) {
+        FileWriter(file).use { writer ->
+            gson.toJson(data, writer)
+        }
+    }
+
+    private fun loadJsonConfig(file: File): Map<String, Any> {
+        FileReader(file).use { reader ->
+            val type: Type = object : TypeToken<Map<String, Any>>() {}.type
+            return gson.fromJson(reader, type)
+        }
+    }
+
     private fun copyFile(source: File, destination: File) {
         if (source.exists()) {
             source.copyTo(destination, overwrite = true)
         } else {
-            plugin.logger.warning("${source.absolutePath} does not exist.")
+            logger.info("\u00A74WARNING\u00A7a: ${source.absolutePath} does not exist.")
         }
     }
 
@@ -133,29 +143,5 @@ class ResourcePackGenerator(private val plugin: Vinyls) {
                 }
             }
         }
-    }
-
-    private fun Map<String, Any>.toJson(): String = buildString {
-        append("{")
-        this@toJson.entries.joinToString(",") { (key, value) ->
-            "\"$key\":${value.toJson()}"
-        }.also { append(it) }
-        append("}")
-    }
-
-    private fun List<*>.toJson(): String = buildString {
-        append("[")
-        this@toJson.joinToString(",") { item ->
-            item.toJson()
-        }.also { append(it) }
-        append("]")
-    }
-
-    private fun Any?.toJson(): String = when (this) {
-        is String -> "\"$this\""
-        is Number, is Boolean -> this.toString()
-        is Map<*, *> -> (this as Map<String, Any>).toJson()
-        is List<*> -> this.toJson()
-        else -> "\"$this\""
     }
 }

@@ -1,6 +1,5 @@
 plugins {
-    java
-    id("io.github.goooler.shadow") version "8.1.7"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     kotlin("jvm") version "2.0.20"
 }
 
@@ -23,25 +22,26 @@ dependencies {
     implementation("com.jeff_media:SpigotUpdateChecker:3.0.3")
 }
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+val targetJavaVersion = 17
+kotlin {
+    jvmToolchain(targetJavaVersion)
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
-    options.release.set(17)
+tasks.build {
+    dependsOn("shadowJar")
 }
 
 tasks.processResources {
-    inputs.properties(mapOf("version" to version))
+    val props = mapOf("version" to version)
+    inputs.properties(props)
     filteringCharset = "UTF-8"
     filesMatching("plugin.yml") {
-        expand(mapOf("version" to version))
+        expand(props)
     }
 }
 
 tasks.shadowJar {
-    relocate("com.jeff_media.customblockdata", "dev.furq.lib.customblockdata")
+    relocate("com.jeff_media.customblockdata", "dev.furq.vinyls.utils")
     relocate("com.jeff_media.morepersistentdatatypes", "dev.furq.lib.morepersistentdatatypes")
     relocate("com.jeff_media.updatechecker", "dev.furq.lib.updatechecker")
     archiveBaseName.set("vinyls")

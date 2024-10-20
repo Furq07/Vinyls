@@ -3,7 +3,6 @@ package dev.furq.vinyls.utils
 import net.minecraft.block.entity.JukeboxBlockEntity
 //? if >=1.20.6 {
 /*import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.NbtComponent
 *///?}
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack

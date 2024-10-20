@@ -65,7 +65,6 @@ object InventoryUpdater {
 
         if (newItem.item != material) {
             newItem = ItemStack(material, newItem.count)
-
             //? if <1.20.6 {
             newItem.nbt = item.nbt?.copy() ?: NbtCompound()
             //?} else {

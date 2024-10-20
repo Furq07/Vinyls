@@ -29,10 +29,10 @@ class ResourcePackGenerator(private val logger: Logger) {
         val itemModelDataMap = mutableMapOf<String, MutableMap<String, Any>>()
         val existingDiscNames = mutableSetOf<String>()
 
-        val discs = discsConfig.getConfigurationSection("discs") as Map<String, Map<String, Any>>
-        discs.forEach { (discName, discData) ->
-            val material = discData["material"] as String
-            val customModelData = discData["custom_model_data"] as Int
+        discsConfig.getConfigurationSection("discs")?.getKeys(false)?.forEach { discName ->
+            val discConfig = discsConfig.getConfigurationSection("discs.$discName")!!
+            val material = discConfig.getString("material")!!.lowercase()
+            val customModelData = discConfig.getInt("custom_model_data")
 
             existingDiscNames.add(discName)
 

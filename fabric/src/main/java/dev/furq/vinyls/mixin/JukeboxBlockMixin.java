@@ -8,7 +8,6 @@ import net.minecraft.block.entity.JukeboxBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -25,6 +24,7 @@ import net.minecraft.item.MusicDiscItem;
 //? if >=1.20.6 {
 /*import net.minecraft.component.DataComponentTypes;
 import org.jetbrains.annotations.Nullable;
+import net.minecraft.state.property.BooleanProperty;
 *///?}
 
 @Mixin(JukeboxBlock.class)
